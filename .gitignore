@@ -1,3 +1,10 @@
+#Own markings
+
+*.db
+*.db-journal
+lib/bot/token.0
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
