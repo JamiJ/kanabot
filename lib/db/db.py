@@ -1,5 +1,6 @@
 from os.path import isfile
 from sqlite import connect
+from apscheduler.triggers import CronTrigger
 
 DB_PATH = "./data/db/database.db"
 BUILD_PATH = "./data/db/build.sql"
@@ -20,11 +21,13 @@ def build():
 	if isfile(BUILD_PATH):
 		scriptexec(BUILD_PATH)
 
-
-
 def commit():
 	cxn.commit()
 
+def autosave(sched):
+	sched.add_job(commit, CronTrigger(second=0))
+#second=0 = every minute
+#minute=0 = every hour	
 
 def close():
 	cxn.close()
