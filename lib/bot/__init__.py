@@ -1,4 +1,6 @@
+from asyncio import sleep
 from datetime import datetime
+from glob import glob
 from discord import Intents
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -9,24 +11,47 @@ from ..db import db
 
 PREFIX ="!"
 OWNER_IDS = [137823385404178432]
+COGS = [path.split("/")[-1][:-3] for path in glob("./lib/cogs/*.py")]
+#Goes thru this cogs library and adds automatically new files for this list.
 
+class Ready(object):
+	def __init__(self):
+		for cog in COGS:
+			setattr(self, cog, False)
+
+	def ready_up(self, cog):
+		setattr(self, cog, True)
+		print(f" {cog} cog ready")
+
+	def all_ready(self):
+		return all([getattr(self, cog) for cog in COGS])
 
 class Bot(BotBase):
 	def __init__(self):
 		self.PREFIX = PREFIX
 		self.ready = False
+		self.cogs_ready = Ready()
+
 		self.guild = None
 		self.scheduler = AsyncIOScheduler()
 
 		db.autosave(self.scheduler)
-		super().__init__(
-			command_prefix=PREFIX, 
-			owner_ids=OWNER_IDS
-			#intents=Intents.all(),
-		)
+		super().__init__(command_prefix=PREFIX, owner_ids=OWNER_IDS)
+			#intents=Intents.all(), )
+
+	def setup(self):
+		for cog in COGS:
+			self.load_extension(f"lib.cogs.{cog}")
+			print (f" {cog} cog loaded")
+			#Prints out the cogs that are loaded
+
+		print("Setup complete")
 
 	def run(self, version):
 		self.VERSION = version
+
+		print("running setup...")
+		self.setup()
 
 		with open("./lib/bot/token.0", "r", encoding="utf-8") as tf:
 			self.TOKEN = tf.read()
@@ -35,8 +60,7 @@ class Bot(BotBase):
 		super().run(self.TOKEN, reconnect=True)
 
 	async def rules_reminder(self):
-		channel = self.get_channel(580468127351963685)
-		await channel.send("I am a timed notification! Currently posting once a week")
+		await self.stdout.send("I am a timed notification! Currently posting once a week")
 		#sends message every time when self.scheduler.add_job is ran
 
 	async def on_connect(self):
@@ -49,8 +73,7 @@ class Bot(BotBase):
 		if err == "on_command_error":
 			await args[0].send("Something went wrong.")
 
-		channel = self.get_channel(580468127351963685)
-		await channel.send("An error occured.")
+		await self.stdout.send("An error occured.")
 		raise 
 
 	async def on_command_error(self, ctx, exc):
@@ -65,15 +88,14 @@ class Bot(BotBase):
 
 	async def on_ready(self):
 		if not self.ready:
-			self.ready = True
 			self.guild = self.get_guild(580468127343575175)
+			self.stdout = self.get_channel(580468127351963685)
 			self.scheduler.add_job(self.rules_reminder, CronTrigger(day_of_week=0, hour=12, minute=0, second=0))
-			#run it every (second="0,15,30,45")
+			#run it every X minute (second="0,15,30,45")
 			self.scheduler.start()
-			channel = self.get_channel(580468127351963685)
 			
 
-			await channel.send("Up and running!")
+			
 			# embed = Embed(title="Now online!", description="Kanabot is now live!", 
 			# 			  color=0xFF0000, timestamp=datetime.utcnow())
 			# fields = [("Name", "Value", True),
@@ -86,6 +108,13 @@ class Bot(BotBase):
 			# await channel.send(embed=embed)
 
 			# #await channel.send(file=File("./data/images/check-mark.png"))
+
+			while not self.cogs_ready.all_ready():
+				await sleep(0.5)
+			#Waits until every cog is ready.
+			
+			await self.stdout.send("Up and running!")
+			self.ready = True
 			print("bot ready")
 		else:
 			print("bot reconnected")
