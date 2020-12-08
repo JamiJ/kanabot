@@ -1,10 +1,11 @@
 from random import choice, randint
 from typing import Optional
 
-from discord import Member
-from discord.ext.commands import Cog
+from aiohttp import request
+from discord import Member, Embed
+from discord.ext.commands import Cog, BucketType
 from discord.ext.commands import BadArgument
-from discord.ext.commands import command
+from discord.ext.commands import command, cooldown
 
 
 class Fun(Cog):
@@ -25,6 +26,10 @@ class Fun(Cog):
 #		await ctx.send(" + ".join([str(r) for r in rolls]) + f" = {sum.(rolls)}")
 
 	@command(name="slap", aliases=["hit"])
+	@cooldown(1, 60, BucketType.user)
+	#First number is how many times it can be used before cooldown
+	#Second number is how long is the cooldown in seconds
+	#BucketType.user = user, .
 	async def slap_member(self, ctx, member: Member, *, reason: Optional[str] = " for no reason"):
 		await ctx.send(f"{ctx.author.display_name} slapped {member.mention} {reason}!")
 
@@ -34,9 +39,45 @@ class Fun(Cog):
 			await ctx.send("Cannot find this member")
 
 	@command(name="echo", aliases=["say"])
+	@cooldown(1, 15, BucketType.guild)
 	async def echo_message(self, ctx, *, message):
 		await ctx.message.delete()
 		await ctx.send(message)
+
+	@command(name="fact")
+	@cooldown(3, 60, BucketType.guild)
+	async def animal_fact(self, ctx, animal: str):
+		if (animal := animal.lower()) in ("dog", "cat", "panda", "fox", "bird", "koala"):
+			fact_url = f"https://some-random-api.ml/facts/{animal}"
+			image_url = f"https://some-random-api.ml/img/{'birb' if animal == 'bird' else animal}"
+
+			async with request("GET", image_url, headers={}) as response:
+				if response.status == 200:
+					data = await response.json()
+					image_link = data["link"]
+					#coroutine error if this is only in one line
+					#image_link = await response.json()["link"]
+
+				else:
+					image_link = None
+
+			async with request("GET", fact_url, headers={}) as response:
+				if response.status == 200:
+					data = await response.json()
+
+					embed = Embed(title=f"{animal.title()} fact",
+								  description=data["fact"],
+								  color=ctx.author.colour)
+					if image_link is not None:
+						embed.set_image(url=image_link)
+					await ctx.send(embed=embed)
+
+				else:
+					await ctx.send(f"API returned a {response.status} status")
+
+		else:
+			await ctx.send("No facts for that animal. Sorry!..")
+
 
 	@Cog.listener()
 	async def on_ready(self):
