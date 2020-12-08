@@ -13,6 +13,7 @@ from ..db import db
 PREFIX ="!"
 OWNER_IDS = [137823385404178432]
 COGS = [path.split("/")[-1][:-3] for path in glob("./lib/cogs/*.py")]
+#If linux / macOS use "/" if Windows use " \\"
 #Goes thru this cogs library and adds automatically new files for this list.
 
 class Ready(object):
@@ -60,12 +61,12 @@ class Bot(BotBase):
 		print("running bot...")
 		super().run(self.TOKEN, reconnect=True)
 
-	async def procees_commands(self, message):
+	async def process_commands(self, message):
 		ctx = await self.get_context(message, cls=Context)
 
 		if ctx.command is not None and ctx.guild is not None:
 			if self.ready:
-				await self.invoked(ctx)
+				await self.invoke(ctx)
 
 		else:
 			await ctx.send("I'm currently not operating correctly. Please wait for a few seconds")

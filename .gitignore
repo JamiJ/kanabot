@@ -1,5 +1,5 @@
 #Own markings
-
+*.vscode
 *.db
 *.db-journal
 lib/bot/token.0

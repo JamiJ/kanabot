@@ -1,7 +1,7 @@
-#import sqlite3
+import sqlite3
 from os.path import isfile
 from sqlite3 import connect
-from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.cron import CronTrigger # pylint: disable=import-error
 
 DB_PATH = "./data/db/database.db"
 BUILD_PATH = "./data/db/build.sql"
@@ -60,7 +60,7 @@ def column(command, *values):
 	return [Item[0] for item in cur.fetchall()]
 
 
-def execute(coimmand, *values):
+def execute(command, *values):
 	cur.execute(command, tuple(values))
 
 
