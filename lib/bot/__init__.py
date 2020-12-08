@@ -5,9 +5,11 @@ from discord import Intents
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from discord import Embed, File
+from discord.errors import HTTPException, Forbidden
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import Context
-from discord.ext.commands import CommandNotFound
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument)
+
 from ..db import db
 
 PREFIX ="!"
@@ -15,6 +17,7 @@ OWNER_IDS = [137823385404178432]
 COGS = [path.split("/")[-1][:-3] for path in glob("./lib/cogs/*.py")]
 #If linux / macOS use "/" if Windows use " \\"
 #Goes thru this cogs library and adds automatically new files for this list.
+IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 
 class Ready(object):
 	def __init__(self):
@@ -89,14 +92,25 @@ class Bot(BotBase):
 		raise 
 
 	async def on_command_error(self, ctx, exc):
-		if isinstance(exc, CommandNotFound):
+		if any([isinstance(exc, error) for error in IGNORE_EXCEPTIONS]):
 			pass
 
+		elif isinstance(exc, MissingRequiredArgument):
+			await ctx.send("One or more arguments are missing")
+
 		elif hasattr(exc, "original"):
-			raise exc.original
+				# elif isinstance(exc.original, HTTPException):
+				# 		await ctx.send("Unable to send message.")
+
+				if isinstance(exc.original, Forbidden):
+					await ctx.send("No permission to do this modification")
+
+				else:
+					raise exc.original
 
 		else:
 			raise exc
+			
 
 	async def on_ready(self):
 		if not self.ready:

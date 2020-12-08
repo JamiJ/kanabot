@@ -2,9 +2,10 @@ from random import choice, randint
 from typing import Optional
 
 from discord import Member
-from discord.errors import HttpException
 from discord.ext.commands import Cog
+from discord.ext.commands import BadArgument
 from discord.ext.commands import command
+
 
 class Fun(Cog):
 	def __init__(self, bot):
@@ -14,7 +15,7 @@ class Fun(Cog):
 
 	@command(name="hello", aliases=["hi"])
 	async def say_hello(self, ctx):
-		await ctx.send(f"[{choice(('Hello', 'Hi', 'Hey'))} {ctx.author.mention}!")
+		await ctx.send(f"{choice(('Hello', 'Hi', 'Hey'))} {ctx.author.mention}!")
 
 #	@command(name="dice", aliases=["roll"])
 #	async def roll_dice(self, ctx, die_string: str):
@@ -24,8 +25,13 @@ class Fun(Cog):
 #		await ctx.send(" + ".join([str(r) for r in rolls]) + f" = {sum.(rolls)}")
 
 	@command(name="slap", aliases=["hit"])
-	async def slap_member(self, ctx, member: Member, *, reason: Optional[str] = "no reason"):
+	async def slap_member(self, ctx, member: Member, *, reason: Optional[str] = " for no reason"):
 		await ctx.send(f"{ctx.author.display_name} slapped {member.mention} {reason}!")
+
+	@slap_member.error
+	async def slap_member_error(self, ctx, exc):
+		if isinstance(exc, BadArgument):
+			await ctx.send("Cannot find this member")
 
 	@command(name="echo", aliases=["say"])
 	async def echo_message(self, ctx, *, message):
