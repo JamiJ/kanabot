@@ -8,7 +8,8 @@ from discord import Embed, File
 from discord.errors import HTTPException, Forbidden
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import Context
-from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument)
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument,
+								  CommandOnCooldown)
 
 from ..db import db
 
@@ -97,6 +98,11 @@ class Bot(BotBase):
 
 		elif isinstance(exc, MissingRequiredArgument):
 			await ctx.send("One or more arguments are missing")
+
+		elif isinstance(exc, CommandOnCooldown):
+			await ctx.send(f"That command is on {str(exc.cooldown.type).split('.')[-1]} cooldown. Try again in {exc.retry_after:,.2f} secs.")
+			#.split splits the BucketType as it would say "..is on BucketType.XX..
+			#With -1 it will get the type and not object name (BucketType)
 
 		elif hasattr(exc, "original"):
 				# elif isinstance(exc.original, HTTPException):
