@@ -10,15 +10,21 @@ from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import Context
 from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument,
 								  CommandOnCooldown)
+from discord.ext.commands import when_mentioned_or, command, has_permissions
 
 from ..db import db
 
-PREFIX ="!"
 OWNER_IDS = [137823385404178432]
 COGS = [path.split("/")[-1][:-3] for path in glob("./lib/cogs/*.py")]
 #If linux / macOS use "/" if Windows use " \\"
 #Goes thru this cogs library and adds automatically new files for this list.
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
+
+def get_prefix(bot, message):
+	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
+	return when_mentioned_or(prefix)(bot, message)
+
+
 
 class Ready(object):
 	def __init__(self):
@@ -34,7 +40,6 @@ class Ready(object):
 
 class Bot(BotBase):
 	def __init__(self):
-		self.PREFIX = PREFIX
 		self.ready = False
 		self.cogs_ready = Ready()
 
@@ -42,7 +47,7 @@ class Bot(BotBase):
 		self.scheduler = AsyncIOScheduler()
 
 		db.autosave(self.scheduler)
-		super().__init__(command_prefix=PREFIX, owner_ids=OWNER_IDS)
+		super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 			#intents=Intents.all(), )
 
 	def setup(self):
@@ -73,7 +78,7 @@ class Bot(BotBase):
 				await self.invoke(ctx)
 
 		else:
-			await ctx.send("I'm currently not operating correctly. Please wait for a few seconds")
+			await ctx.send("I'm currently not operating correctly. Please wait for a few seconds", delete_after=10)
 
 	async def rules_reminder(self):
 		await self.stdout.send("I am a timed notification! Currently posting once a week")
@@ -87,9 +92,9 @@ class Bot(BotBase):
 
 	async def on_error(self, err, *args, **kwargs):
 		if err == "on_command_error":
-			await args[0].send("Something went wrong.")
+			await args[0].send("Something went wrong.", delete_after=10)
 
-		await self.stdout.send("An error occured.")
+		await self.stdout.send("An error occured.", delete_after=10)
 		raise 
 
 	async def on_command_error(self, ctx, exc):
@@ -97,10 +102,10 @@ class Bot(BotBase):
 			pass
 
 		elif isinstance(exc, MissingRequiredArgument):
-			await ctx.send("One or more arguments are missing")
+			await ctx.send("One or more arguments are missing", delete_after=10)
 
 		elif isinstance(exc, CommandOnCooldown):
-			await ctx.send(f"That command is on {str(exc.cooldown.type).split('.')[-1]} cooldown. Try again in {exc.retry_after:,.2f} secs.")
+			await ctx.send(f"That command is on {str(exc.cooldown.type).split('.')[-1]} cooldown. Try again in {exc.retry_after:,.2f} secs.", delete_after=20)
 			#.split splits the BucketType as it would say "..is on BucketType.XX..
 			#With -1 it will get the type and not object name (BucketType)
 
@@ -109,7 +114,7 @@ class Bot(BotBase):
 				# 		await ctx.send("Unable to send message.")
 
 				if isinstance(exc.original, Forbidden):
-					await ctx.send("No permission to do this modification")
+					await ctx.send("No permission to do this modification", delete_after=10)
 
 				else:
 					raise exc.original
@@ -145,7 +150,7 @@ class Bot(BotBase):
 				await sleep(0.5)
 			#Waits until every cog is ready.
 			
-			await self.stdout.send("Up and running!")
+			await self.stdout.send("Up and running!", delete_after=10)
 			self.ready = True
 			print("bot ready")
 		else:

@@ -62,7 +62,7 @@ class Help(Cog):
 					  description=syntax(command),
 					  color=ctx.author.colour)
 		embed.add_field(name="Command description", value=command.help)
-		await ctx.send(embed=embed)
+		await ctx.send(embed=embed, delete_after=120)
 
 
 	@command(name="help") #brief="some text"
@@ -78,10 +78,12 @@ class Help(Cog):
 		else:
 			if (command := get(self.bot.commands, name=cmd)):
 				#Command will be set as object 
+				await ctx.message.delete()
 				await self.cmd_help(ctx, command)
 
 			else:
-				await ctx.send("This command doesn't exist.")
+				await ctx.message.delete()
+				await ctx.send("This command doesn't exist.", delete_after=10)
 
 
 	@Cog.listener()

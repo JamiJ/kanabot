@@ -36,7 +36,7 @@ class Fun(Cog):
 	@slap_member.error
 	async def slap_member_error(self, ctx, exc):
 		if isinstance(exc, BadArgument):
-			await ctx.send("Cannot find this member")
+			await ctx.send("Cannot find this member", delete_after=10)
 
 	@command(name="echo", aliases=["say"])
 	@cooldown(1, 15, BucketType.guild)
@@ -70,13 +70,13 @@ class Fun(Cog):
 								  color=ctx.author.colour)
 					if image_link is not None:
 						embed.set_image(url=image_link)
-					await ctx.send(embed=embed)
+					await ctx.send(embed=embed, delete_after=60)
 
 				else:
-					await ctx.send(f"API returned a {response.status} status")
+					await ctx.send(f"API returned a {response.status} status", delete_after=10)
 
 		else:
-			await ctx.send("No facts for that animal. Sorry!..")
+			await ctx.send("No facts for that animal. Sorry!..", delete_after=10)
 
 
 	@Cog.listener()
