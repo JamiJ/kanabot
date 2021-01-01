@@ -77,8 +77,9 @@ class Bot(BotBase):
 			if self.ready:
 				await self.invoke(ctx)
 
-		else:
-			await ctx.send("I'm currently not operating correctly. Please wait for a few seconds", delete_after=10)
+			else:
+				await ctx.send("I'm currently not operating correctly. Please wait for a few seconds", delete_after=10)
+
 
 	async def rules_reminder(self):
 		await self.stdout.send("I am a timed notification! Currently posting once a week")

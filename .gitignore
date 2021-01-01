@@ -3,7 +3,7 @@
 *.db
 *.db-journal
 lib/bot/token.0
-
+data/profanity.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
