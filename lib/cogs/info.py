@@ -9,7 +9,7 @@ class Info(Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@command(name="userinfo", aliases=["memberinfo","ui"])
+	@command(name="userinfo", aliases=["memberinfo","ui"], brief="Shows member info.")
 	async def user_info(self, ctx, target: Optional[Member]):
 		target = target or ctx.author
 		#If there is no member linked, it will show information about you
@@ -33,9 +33,9 @@ class Info(Cog):
 		for name, value, inline in fields:
 			embed.add_field(name=name, value=value, inline=inline)
 
-		await ctx.send(embed=embed)
+		await ctx.send(embed=embed, delete_after=120)
 
-	@command(name="serverinfo", aliases=["guildinfo", "si"])
+	@command(name="serverinfo", aliases=["guildinfo", "si"], brief="Shows server info.")
 	async def server_info(self, ctx):
 		embed = Embed(title="Server information",
 					  #colour=ctx.guild.owner.colour,
@@ -67,7 +67,7 @@ class Info(Cog):
 		for name, value, inline in fields:
 			embed.add_field(name=name, value=value, inline=inline)
 
-		await ctx.send(embed=embed)
+		await ctx.send(embed=embed, delete_after=120)
 
 	@Cog.listener()
 	async def on_ready(self):

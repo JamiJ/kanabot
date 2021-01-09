@@ -65,7 +65,7 @@ class Help(Cog):
 		await ctx.send(embed=embed, delete_after=120)
 
 
-	@command(name="help") #brief="some text"
+	@command(name="help", brief="Show more help to command.")
 	async def show_help(self, ctx, cmd: Optional[str]):
 		"""Shows this message."""
 		if cmd is None:

@@ -46,7 +46,7 @@ class Mod(Cog):
 
 				await self.log_channel.send(embed=embed)
 
-	@command(name="kick")
+	@command(name="kick", brief="Kick member from the server.")
 	@bot_has_permissions(kick_members=True)
 	@has_permissions(kick_members=True)
 	async def kick_command(self, ctx, targets: Greedy[Member], *, reason: Optional[str] = "No reason provided."):
@@ -55,7 +55,7 @@ class Mod(Cog):
 
 		else:
 			await self.kick_members(ctx.message, targets, reason)
-			await ctx.send("Action complete.")
+			await ctx.send("Action complete.", delete_after=10)
 
 	@kick_command.error
 	async def kick_command_error(self, ctx, exc):
@@ -84,7 +84,7 @@ class Mod(Cog):
 
 					await self.log_channel.send(embed=embed)
 
-	@command(name="ban")
+	@command(name="ban", brief="Ban member from the server.")
 	@bot_has_permissions(ban_members=True)
 	@has_permissions(ban_members=True)
 	async def ban_command(self, ctx, targets: Greedy[Member], *, reason: Optional[str] = "No reason provided."):
@@ -94,14 +94,14 @@ class Mod(Cog):
 		else:
 			#await ctx.send(f"{target.display_name} could not be banned.")
 			await self.ban_members(ctx.message, targets, reason)
-			await ctx.send("Action complete.")
+			await ctx.send("Action complete.", delete_after=10)
 
 	@ban_command.error
 	async def ban_command_error(self, ctx, exc):
 		if isinstance(exc, CheckFailure):
 			await ctx.send("Insufficient permissions to perform that task.")
 
-	@command(name="clear", aliases=["purge"])
+	@command(name="clear", aliases=["purge"], brief="Clear chat @User X times.")
 	@bot_has_permissions(manage_messages=True)
 	@has_permissions(manage_messages=True)
 	async def clear_messages(self, ctx, targets: Greedy[Member], limit: Optional[int] = 1):
@@ -121,7 +121,7 @@ class Mod(Cog):
 				await ctx.send(f"Deleted {len(deleted):,} messages.", delete_after=5)
 
 		else:
-			await ctx.send("The limit provided is not within acceptable bounds.")
+			await ctx.send("The limit provided is not within acceptable bounds.", delete_after=10)
 
 
 	async def mute_members(self, message, targets, hours, reason):
@@ -163,7 +163,7 @@ class Mod(Cog):
 	#This needs to be tested much better also unmute command
 	#some secret stuff is still happening, please try with normal people, not bots.
 	#somtimes dont spam mentions triggers, even no mentios is showed
-	@command(name="mute")
+	@command(name="mute", brief="Mute member for X hours.")
 	@bot_has_permissions(manage_roles=True)
 	@has_permissions(manage_roles=True, manage_guild=True)
 	async def mute_command(self, ctx, targets: Greedy[Member], hours: Optional[int], *,
@@ -173,7 +173,7 @@ class Mod(Cog):
 
 		else:
 			unmutes = await self.mute_members(ctx.message, targets, hours, reason)
-			await ctx.send("Action complete.")
+			await ctx.send("Action complete.", delete_after=10)
 
 			if len(unmutes):
 				await sleep(hours)
@@ -208,17 +208,17 @@ class Mod(Cog):
 
 				await self.log_channel.send(embed=embed)
 
-	@command(name="unmute")
+	@command(name="unmute", brief="Unmute member.")
 	@bot_has_permissions(manage_roles=True)
 	@has_permissions(manage_roles=True, manage_guild=True)
 	async def unmute_command(self, ctx, targets: Greedy[Member], *, reason: Optional[str] = "No reason provided."):
 		if not len(targets):
-			await ctx.send("One or more required arguments is missing.")
+			await ctx.send("One or more required arguments is missing.", delete_after=10)
 
 		else:
 			await self.unmute_members(ctx.guild, targets, reason=reason)
 
-	@command(name="addprofanity", aliases=["addswears", "addcursers"])
+	@command(name="addprofanity", aliases=["addswears", "addcursers"], brief="Add words to profanity filter.")
 	@has_permissions(manage_guild=True)
 	async def add_profanity(self, ctx, *words):
 		with open("./data/profanity.txt", "a", encoding="utf-8") as f:
@@ -229,9 +229,9 @@ class Mod(Cog):
 		#and it will show as notification about "You can't use that word..."
 		#this needs to be fixed later on
 		#maybe to use aiofiles?
-		await ctx.send("Action complete.")
+		await ctx.send("Action complete.", delete_after=10)
 
-	@command(name="delprofanity", aliases=["delswears", "delcurses"])
+	@command(name="delprofanity", aliases=["delswears", "delcurses"], brief="Delete words from profanity filter.")
 	@has_permissions(manage_guild=True)
 	async def remove_profanity(self, ctx, *words):
 		with open("./data/profanity.txt", "r", encoding="utf-8") as f:
@@ -241,7 +241,7 @@ class Mod(Cog):
 			f.write("".join([f"{w}\n" for w in stored if w not in words]))
 
 		profanity.load_censor_words_from_file("./data/profanity.txt")
-		await ctx.send("Action complete.")
+		await ctx.send("Action complete.", delete_after=10)
 
 	@Cog.listener()
 	async def on_ready(self):

@@ -16,7 +16,7 @@ class Fun(Cog):
 
 	@command(name="hello", aliases=["hi"])
 	async def say_hello(self, ctx):
-		await ctx.send(f"{choice(('Hello', 'Hi', 'Hey'))} {ctx.author.mention}!")
+		await ctx.send(f"{choice(('Hello', 'Hi', 'Hey'))} {ctx.author.mention}!", delete_after=10)
 
 #	@command(name="dice", aliases=["roll"])
 #	async def roll_dice(self, ctx, die_string: str):
@@ -31,7 +31,7 @@ class Fun(Cog):
 	#Second number is how long is the cooldown in seconds
 	#BucketType.user = user, .
 	async def slap_member(self, ctx, member: Member, *, reason: Optional[str] = " for no reason"):
-		await ctx.send(f"{ctx.author.display_name} slapped {member.mention} {reason}!")
+		await ctx.send(f"{ctx.author.display_name} slapped {member.mention} {reason}!", delete_after=10)
 
 	@slap_member.error
 	async def slap_member_error(self, ctx, exc):

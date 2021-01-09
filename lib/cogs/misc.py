@@ -9,17 +9,17 @@ class Misc(Cog):
 		self.bot = bot
 
 
-	@command(name="prefix")
+	@command(name="prefix", brief="Change bot prefix in current server.")
 	@has_permissions(manage_guild=True)
 	async def change_prefix(self, ctx, new: str):
 		if len(new) > 5:
-			await ctx.send("The prefix can not be more than 5 characters in lenght.")
+			await ctx.send("The prefix can not be more than 5 characters in lenght.", delete_after=10)
 
 		else:
 			db.execute("UPDATE guilds SET Prefix = ? WHERE GuildID = ?", new, ctx.guild.id)
 			#make it so it automatically adds the new GuildID when this command is given.
 			#currently you need to manually add the guild into database
-			await ctx.send(f"Prefix set to {new}.")
+			await ctx.send(f"Prefix set to {new}.", delete_after=60)
 
 	@change_prefix.error
 	async def change_prefix_error(self, ctx, exc):

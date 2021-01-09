@@ -24,8 +24,6 @@ def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	return when_mentioned_or(prefix)(bot, message)
 
-
-
 class Ready(object):
 	def __init__(self):
 		for cog in COGS:
